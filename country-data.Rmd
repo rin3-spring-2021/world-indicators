@@ -1,0 +1,47 @@
+---
+title: "Analyzing World Economic, Social and Demographic Trends"
+author: "Grant Cook"
+date: "4/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+The website [gapminder.org](gapminder.org) visualizes social, economic and demographic data by country to debunk common misconceptions in global data trends. Hans Rosling, one of the organization's founders, gave a [famous TED Talk](https://www.youtube.com/watch?v=jbkSRLYSojo&t=59s) in which he animates various charts to show how these indicators evolve over time. I will attempt to recreate some of those visualizations here using data sourced from Gapminder and including variables on GPD and life expectancy by country over time.
+
+
+```{r}
+# Import libraries and dataset
+library(tidyverse)
+library(janitor)
+library(wesanderson)
+
+data <- read_csv("data-processed/country_5yr.csv")
+```
+
+```{r}
+# Basic data summarizing
+data %>%
+  filter(year %in% c(2010)) %>% 
+  group_by(region, year) %>% 
+  summarize(Avg_GDP_pc=(sum(gdp, na.rm=TRUE)/sum(population, na.rm=TRUE)),
+            Avg_LE=mean(life_expectancy, na.rm=TRUE))
+```
+
+```{r}
+# Basic visualization: scatterplot of life exp vs. gdp pc in 2010
+pal <- c("#009E73", "#F0E442", "#0072B2", "#D55E00")
+data %>% 
+  filter(year==2010) %>% 
+  ggplot(aes(x=gdp_percap, y=life_expectancy, size=population, color=region)) +
+  geom_point(alpha=0.8) +
+  scale_color_manual(values=pal) +
+  scale_x_continuous(trans="log2",
+                     breaks=c(0,1000,2000,4000,8000,16000,32000,64000,128000)) +
+  scale_size_continuous(range=c(1,12))
+
+```
+
